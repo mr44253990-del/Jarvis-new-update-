@@ -1,0 +1,6 @@
+{
+  "name": "Archer AI",
+  "description": "Futuristic Jarvis-style voice assistant and automation companion with live Gemini AI, system control, holographic core, memory, and task manager.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
