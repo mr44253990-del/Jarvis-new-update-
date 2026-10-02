@@ -61,31 +61,38 @@ class ActionExecutor(
                 }
 
                 is DeviceAction.OpenYouTube -> {
-                    val query = action.query
-                    val intent = if (query.isNotBlank()) {
-                        val appIntent = Intent(Intent.ACTION_SEARCH).apply {
+                    val query = action.query.trim()
+                    if (query.isNotBlank()) {
+                        val webUri = Uri.parse("https://www.youtube.com/results?search_query=${Uri.encode(query)}")
+                        val ytIntent = Intent(Intent.ACTION_VIEW, webUri).apply {
                             setPackage("com.google.android.youtube")
-                            putExtra("query", query)
                             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         }
-                        if (intentResolves(appIntent)) {
-                            appIntent
-                        } else {
-                            val webUri = Uri.parse("https://www.youtube.com/results?search_query=${Uri.encode(query)}")
-                            Intent(Intent.ACTION_VIEW, webUri).apply {
+                        try {
+                            context.startActivity(ytIntent)
+                        } catch (e: Exception) {
+                            // Fallback to default browser or any video app
+                            val browserIntent = Intent(Intent.ACTION_VIEW, webUri).apply {
                                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             }
+                            context.startActivity(browserIntent)
                         }
+                        logAction("YouTube", "Query: $query")
+                        "স্যার, ইউটিউবে '$query' চালানো হচ্ছে।"
                     } else {
                         val launchIntent = context.packageManager.getLaunchIntentForPackage("com.google.android.youtube")
-                        launchIntent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) ?: Intent(
-                            Intent.ACTION_VIEW,
-                            Uri.parse("https://www.youtube.com")
-                        ).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
+                        if (launchIntent != null) {
+                            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            context.startActivity(launchIntent)
+                        } else {
+                            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.youtube.com")).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            context.startActivity(browserIntent)
+                        }
+                        logAction("YouTube", "Opened YouTube app/web")
+                        "স্যার, ইউটিউব ওপেন করা হয়েছে।"
                     }
-                    context.startActivity(intent)
-                    logAction("YouTube", "Query: $query")
-                    if (query.isNotBlank()) "স্যার, ইউটিউবে '$query' চালানো হচ্ছে।" else "স্যার, ইউটিউব ওপেন করা হয়েছে।"
                 }
 
                 is DeviceAction.OpenBrowser -> {
@@ -216,6 +223,26 @@ class ActionExecutor(
                     context.startActivity(intent)
                     logAction("Alarm", "Set for ${action.hour}:${action.minute}")
                     "স্যার, অ্যালার্ম সেট করার জন্য ক্লক অ্যাপ ওপেন করা হয়েছে।"
+                }
+
+                is DeviceAction.CreateTextFile -> {
+                    val file = java.io.File(context.filesDir, action.fileName)
+                    file.writeText(action.content)
+                    // Also store as memory so AI remembers it
+                    memoryDao.insertMemory(MemoryEntity(factKey = "File: ${action.fileName}", factValue = action.content))
+                    logAction("Create File", "Created ${action.fileName} (${action.content.length} chars)")
+                    "স্যার, '${action.fileName}' ফাইলটি সফলভাবে সংরক্ষণ করা হয়েছে।"
+                }
+
+                is DeviceAction.ReadTextFile -> {
+                    val file = java.io.File(context.filesDir, action.fileName)
+                    if (file.exists()) {
+                        val content = file.readText()
+                        logAction("Read File", "Read ${action.fileName}")
+                        "স্যার, '${action.fileName}' ফাইলের বিষয়বস্তু হলো:\n$content"
+                    } else {
+                        "দুঃখিত স্যার, '${action.fileName}' ফাইলটি পাওয়া যায়নি।"
+                    }
                 }
 
                 DeviceAction.None -> ""

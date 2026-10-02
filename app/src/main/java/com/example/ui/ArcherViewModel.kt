@@ -83,6 +83,7 @@ class ArcherViewModel(application: Application) : AndroidViewModel(application) 
         private set
 
     init {
+        val alwaysRun = prefs.isAlwaysVoiceRun()
         voiceManager = VoiceManager(
             context = application.applicationContext,
             onSpeechResult = { text ->
@@ -92,7 +93,15 @@ class ArcherViewModel(application: Application) : AndroidViewModel(application) 
             onError = { err ->
                 _lastAiResponse.value = err
             }
-        )
+        ).apply {
+            isAlwaysVoiceRun = alwaysRun
+        }
+
+        viewModelScope.launch {
+            prefs.alwaysVoiceRunFlow.collect { enabled ->
+                voiceManager?.isAlwaysVoiceRun = enabled
+            }
+        }
 
         // Automatically test connection on startup
         testConnection()
@@ -119,14 +128,21 @@ class ArcherViewModel(application: Application) : AndroidViewModel(application) 
         } else if (voiceManager?.isListening?.value == true) {
             voiceManager?.stopListening()
         } else {
-            voiceManager?.startListening()
+            voiceManager?.resumeAlwaysVoiceRun()
         }
     }
 
     fun stopAll() {
-        voiceManager?.stopSpeaking()
-        voiceManager?.stopListening()
+        voiceManager?.stopAllManual()
         _isThinking.value = false
+    }
+
+    fun toggleAlwaysVoiceRun(enabled: Boolean) {
+        prefs.setAlwaysVoiceRun(enabled)
+        voiceManager?.isAlwaysVoiceRun = enabled
+        if (enabled && voiceManager?.isListening?.value != true && voiceManager?.isSpeaking?.value != true) {
+            voiceManager?.startListening()
+        }
     }
 
     fun processUserInput(input: String) {

@@ -69,6 +69,7 @@ fun ArcherMainScreen(
     val showHud by viewModel.prefs.showHudFlow.collectAsStateWithLifecycle()
     val overlayEnabled by viewModel.prefs.overlayEnabledFlow.collectAsStateWithLifecycle()
     val screenShareEnabled by viewModel.prefs.screenShareFlow.collectAsStateWithLifecycle()
+    val alwaysVoiceRun by viewModel.prefs.alwaysVoiceRunFlow.collectAsStateWithLifecycle()
 
     var speechRate by remember { mutableFloatStateOf(viewModel.prefs.getSpeechRate()) }
     var speechPitch by remember { mutableFloatStateOf(viewModel.prefs.getSpeechPitch()) }
@@ -95,6 +96,17 @@ fun ArcherMainScreen(
 
     val requestAllPermissions = {
         permissionsLauncher.launch(permissionsToRequest.toTypedArray())
+    }
+
+    // Auto start Always Voice Run if permission is already granted
+    LaunchedEffect(alwaysVoiceRun) {
+        val hasAudio = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.RECORD_AUDIO
+        ) == PackageManager.PERMISSION_GRANTED
+        if (hasAudio && alwaysVoiceRun && !isListening && !isSpeaking) {
+            viewModel.voiceManager?.resumeAlwaysVoiceRun()
+        }
     }
 
     // First Launch setup dialog if API key is empty
@@ -205,14 +217,31 @@ fun ArcherMainScreen(
                             )
                         }
 
-                        // Floating Status Dot
-                        Box(
+                        // Quick Always Voice Run Toggle & Status Dot
+                        Row(
                             modifier = Modifier
-                                .size(10.dp)
-                                .clip(CircleShape)
-                                .background(if (latencyMs != null) Color(0xFF22C55E) else Color(0xFF94A3B8))
-                                .border(1.dp, Color.White.copy(alpha = 0.6f), CircleShape)
-                        )
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(if (alwaysVoiceRun) Color(0xFF064E3B) else Color(0xFF1E293B))
+                                .border(1.dp, if (alwaysVoiceRun) SettingsGreen else Color.Gray, RoundedCornerShape(12.dp))
+                                .clickable { viewModel.toggleAlwaysVoiceRun(!alwaysVoiceRun) }
+                                .padding(horizontal = 8.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .clip(CircleShape)
+                                    .background(if (alwaysVoiceRun) SettingsGreen else Color.Gray)
+                            )
+                            Text(
+                                text = if (alwaysVoiceRun) "ALWAYS VOICE" else "VOICE PAUSED",
+                                color = if (alwaysVoiceRun) Color(0xFFA7F3D0) else Color.Gray,
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
                     }
                 }
 
@@ -290,6 +319,7 @@ fun ArcherMainScreen(
                             isThinking = isThinking,
                             audioLevel = audioLevel,
                             isMuted = isMuted,
+                            isAlwaysVoiceRun = alwaysVoiceRun,
                             onOrbClick = {
                                 val hasAudio = ContextCompat.checkSelfPermission(
                                     context,
@@ -393,6 +423,7 @@ fun ArcherMainScreen(
                 showHud = showHud,
                 overlayEnabled = overlayEnabled,
                 screenShareEnabled = screenShareEnabled,
+                alwaysVoiceRun = alwaysVoiceRun,
                 speechRate = speechRate,
                 speechPitch = speechPitch,
                 connectionStatus = connectionStatus,
@@ -409,6 +440,7 @@ fun ArcherMainScreen(
                 onToggleShowHud = { viewModel.prefs.setShowHud(it) },
                 onToggleOverlay = { viewModel.prefs.setOverlayEnabled(it) },
                 onToggleScreenShare = { viewModel.prefs.setScreenShareEnabled(it) },
+                onToggleAlwaysVoiceRun = { viewModel.toggleAlwaysVoiceRun(it) },
                 onSpeechRateChange = {
                     speechRate = it
                     viewModel.prefs.setSpeechRate(it)

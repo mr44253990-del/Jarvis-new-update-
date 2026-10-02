@@ -24,6 +24,7 @@ class AppPreferences(context: Context) {
         const val KEY_SCREEN_SHARE_ENABLED = "screen_share_enabled"
         const val KEY_SHOW_HUD = "show_hud"
         const val KEY_FIRST_LAUNCH = "first_launch"
+        const val KEY_ALWAYS_VOICE_RUN = "always_voice_run"
 
         val LIVE_MODELS = listOf(
             "gemini-3.5-flash",
@@ -55,6 +56,9 @@ class AppPreferences(context: Context) {
 
     private val _screenShareFlow = MutableStateFlow(isScreenShareEnabled())
     val screenShareFlow: StateFlow<Boolean> = _screenShareFlow.asStateFlow()
+
+    private val _alwaysVoiceRunFlow = MutableStateFlow(isAlwaysVoiceRun())
+    val alwaysVoiceRunFlow: StateFlow<Boolean> = _alwaysVoiceRunFlow.asStateFlow()
 
     fun getApiKey(): String {
         val saved = prefs.getString(KEY_API_KEY, "") ?: ""
@@ -169,5 +173,14 @@ class AppPreferences(context: Context) {
 
     fun setFirstLaunch(completed: Boolean) {
         prefs.edit().putBoolean(KEY_FIRST_LAUNCH, !completed).apply()
+    }
+
+    fun isAlwaysVoiceRun(): Boolean {
+        return prefs.getBoolean(KEY_ALWAYS_VOICE_RUN, true) // Enabled by default: No Idle, Always Voice Run
+    }
+
+    fun setAlwaysVoiceRun(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_ALWAYS_VOICE_RUN, enabled).apply()
+        _alwaysVoiceRunFlow.value = enabled
     }
 }

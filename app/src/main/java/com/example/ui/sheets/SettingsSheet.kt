@@ -41,6 +41,7 @@ fun SettingsSheet(
     showHud: Boolean,
     overlayEnabled: Boolean,
     screenShareEnabled: Boolean,
+    alwaysVoiceRun: Boolean,
     speechRate: Float,
     speechPitch: Float,
     connectionStatus: String,
@@ -52,6 +53,7 @@ fun SettingsSheet(
     onToggleShowHud: (Boolean) -> Unit,
     onToggleOverlay: (Boolean) -> Unit,
     onToggleScreenShare: (Boolean) -> Unit,
+    onToggleAlwaysVoiceRun: (Boolean) -> Unit,
     onSpeechRateChange: (Float) -> Unit,
     onSpeechPitchChange: (Float) -> Unit,
     onTestConnection: () -> Unit,
@@ -324,6 +326,45 @@ fun SettingsSheet(
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Always Voice Run Switch (No Idle Mode)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0xFF064E3B).copy(alpha = 0.4f))
+                    .border(1.2.dp, SettingsGreen, RoundedCornerShape(12.dp))
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Box(modifier = Modifier.size(8.dp).clip(androidx.compose.foundation.shape.CircleShape).background(SettingsGreen))
+                        Text(
+                            text = "Always Voice Run (নো আইডল মোড)",
+                            color = Color.White,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Text(
+                        text = "কথা বলা শেষ হলেই স্বয়ংক্রিয়ভাবে আবার শোনা শুরু করবে। কখনই আইডল বা বন্ধ হবে না।",
+                        color = Color(0xFFA7F3D0),
+                        fontSize = 11.sp
+                    )
+                }
+                Switch(
+                    checked = alwaysVoiceRun,
+                    onCheckedChange = onToggleAlwaysVoiceRun,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.Black,
+                        checkedTrackColor = SettingsGreen
+                    )
+                )
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 

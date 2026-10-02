@@ -49,6 +49,7 @@ fun HolographicCoreOrb(
     isThinking: Boolean,
     audioLevel: Float,
     isMuted: Boolean,
+    isAlwaysVoiceRun: Boolean = true,
     onOrbClick: () -> Unit,
     onStopClick: () -> Unit,
     onToggleMute: () -> Unit,
@@ -103,13 +104,15 @@ fun HolographicCoreOrb(
         isSpeaking -> "• SPEAKING •"
         isListening -> "• LISTENING •"
         isThinking -> "• PROCESSING •"
-        else -> "• IDLE •"
+        isAlwaysVoiceRun -> "• ACTIVE LISTENING •"
+        else -> "• STANDBY •"
     }
 
     val statusColor = when {
         isSpeaking -> Color(0xFF6EE7B7)
         isListening -> MemoryCyan
         isThinking -> ChatOrange
+        isAlwaysVoiceRun -> Color(0xFF22C55E)
         else -> Color(0xFF94A3B8)
     }
 

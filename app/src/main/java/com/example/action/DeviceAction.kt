@@ -16,5 +16,7 @@ sealed class DeviceAction {
     data class SetAlarm(val hour: Int, val minute: Int, val message: String) : DeviceAction()
     data class AdjustVolume(val increase: Boolean) : DeviceAction()
     object GetCurrentTime : DeviceAction()
+    data class CreateTextFile(val fileName: String, val content: String) : DeviceAction()
+    data class ReadTextFile(val fileName: String) : DeviceAction()
     object None : DeviceAction()
 }
