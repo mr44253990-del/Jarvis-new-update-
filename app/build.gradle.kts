@@ -12,6 +12,9 @@ android {
   namespace = "com.example"
   compileSdk { version = release(36) { minorApiLevel = 1 } }
 
+  val geminiApiKey = project.findProperty("GEMINI_API_KEY")?.toString()
+    ?.takeIf { it.isNotBlank() } ?: "REPLACE_WITH_GEMINI_API_KEY"
+
   defaultConfig {
     applicationId = "com.aistudio.archerai.jarvis"
     minSdk = 24
@@ -33,11 +36,16 @@ android {
   }
 
   buildTypes {
+    debug {
+      isMinifyEnabled = false
+      buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
+    }
     release {
       isCrunchPngs = false
       isMinifyEnabled = false
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
       signingConfig = signingConfigs.getByName("release")
+      buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
     }
   }
   compileOptions {
