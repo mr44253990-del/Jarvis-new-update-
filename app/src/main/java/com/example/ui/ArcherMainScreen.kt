@@ -48,6 +48,7 @@ fun ArcherMainScreen(
     val activeSheet by viewModel.activeSheet.collectAsStateWithLifecycle()
 
     val isThinking by viewModel.isThinking.collectAsStateWithLifecycle()
+    val isMemoryActive by viewModel.isMemoryActive.collectAsStateWithLifecycle()
     val isMuted by viewModel.isMuted.collectAsStateWithLifecycle()
     val lastUserSpeech by viewModel.lastUserSpeech.collectAsStateWithLifecycle()
     val lastAiResponse by viewModel.lastAiResponse.collectAsStateWithLifecycle()
@@ -148,25 +149,47 @@ fun ArcherMainScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    // History Icon (Left)
-                    IconButton(
-                        onClick = { viewModel.openSheet(SheetType.HISTORY) },
-                        modifier = Modifier
-                            .size(42.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFF0B1F17))
-                            .border(1.dp, Color(0xFF16382B), CircleShape)
-                            .testTag("history_button")
+                    // History & Notes Icons (Left)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.History,
-                            contentDescription = "Action History",
-                            tint = Color(0xFF6EE7B7),
-                            modifier = Modifier.size(20.dp)
-                        )
+                        IconButton(
+                            onClick = { viewModel.openSheet(SheetType.HISTORY) },
+                            modifier = Modifier
+                                .size(42.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF0B1F17))
+                                .border(1.dp, Color(0xFF16382B), CircleShape)
+                                .testTag("history_button")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.History,
+                                contentDescription = "Action History",
+                                tint = Color(0xFF6EE7B7),
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+
+                        IconButton(
+                            onClick = { viewModel.openSheet(SheetType.NOTES) },
+                            modifier = Modifier
+                                .size(42.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF0B1F17))
+                                .border(1.dp, Color(0xFF0284C7).copy(alpha = 0.6f), CircleShape)
+                                .testTag("notes_button")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Description,
+                                contentDescription = "Files & Notes (yt.txt)",
+                                tint = MemoryCyan,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
                     }
 
-                    // Center App Title: Hood Emblem + ARCHER AI
+                    // Center App Title: Hood Emblem + RAKIB JARVIS
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -186,11 +209,11 @@ fun ArcherMainScreen(
                             )
                         }
                         Text(
-                            text = "ARCHER AI",
+                            text = "RAKIB JARVIS",
                             color = Color.White,
-                            fontSize = 18.sp,
+                            fontSize = 17.sp,
                             fontWeight = FontWeight.Black,
-                            letterSpacing = 2.sp
+                            letterSpacing = 1.5.sp
                         )
                     }
 
@@ -320,6 +343,7 @@ fun ArcherMainScreen(
                             audioLevel = audioLevel,
                             isMuted = isMuted,
                             isAlwaysVoiceRun = alwaysVoiceRun,
+                            isMemoryActive = isMemoryActive,
                             onOrbClick = {
                                 val hasAudio = ContextCompat.checkSelfPermission(
                                     context,
@@ -333,6 +357,11 @@ fun ArcherMainScreen(
                             },
                             onStopClick = { viewModel.stopAll() },
                             onToggleMute = { viewModel.toggleMute() },
+                            onMiniModeClick = {
+                                if (!viewModel.launchMiniMode(context)) {
+                                    viewModel.openSheet(SheetType.SETTINGS)
+                                }
+                            },
                             modifier = Modifier.weight(0.75f)
                         )
                     }
@@ -489,6 +518,11 @@ fun ArcherMainScreen(
                 onDismiss = { viewModel.closeSheet() }
             )
         }
+        SheetType.NOTES -> {
+            NotesSheet(
+                onDismiss = { viewModel.closeSheet() }
+            )
+        }
         null -> {}
     }
 
@@ -501,13 +535,13 @@ fun ArcherMainScreen(
             title = {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Icon(Icons.Default.Bolt, contentDescription = null, tint = MemoryCyan)
-                    Text("ARCHER AI INITIALIZATION", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text("RAKIB JARVIS INITIALIZATION", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 }
             },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        text = "স্বাগতম! Archer AI পরিচালনার জন্য Google Gemini API Key প্রবেশ করান। মডেলটি স্বয়ংক্রিয়ভাবে 'gemini-3.5-flash' এ সেট করা রয়েছে।",
+                        text = "স্বাগতম! Rakib Jarvis পরিচালনার জন্য Google Gemini API Key প্রবেশ করান। ডিফল্টভাবে মডেলটি 'gemini-2.5-flash' এ প্রস্তুত রয়েছে।",
                         color = Color(0xFFCBD5E1),
                         fontSize = 12.5.sp
                     )

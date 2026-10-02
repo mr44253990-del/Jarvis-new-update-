@@ -1,6 +1,6 @@
 {
-  "name": "Archer AI",
-  "description": "Futuristic Jarvis-style voice assistant and automation companion with live Gemini AI, system control, holographic core, memory, and task manager.",
+  "name": "Rakib Jarvis",
+  "description": "Next-gen liquid cyber voice assistant & device automation engine powered by Gemini AI with live continuous voice, holographic core, smart notes, and floating reactor.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

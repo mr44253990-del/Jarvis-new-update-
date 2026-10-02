@@ -27,16 +27,17 @@ class AppPreferences(context: Context) {
         const val KEY_ALWAYS_VOICE_RUN = "always_voice_run"
 
         val LIVE_MODELS = listOf(
+            "gemini-2.5-flash",
+            "gemini-2.5-pro",
+            "gemini-2.0-flash",
+            "gemini-1.5-flash",
+            "gemini-1.5-pro",
             "gemini-3.5-flash",
             "gemini-3.1-pro-preview",
-            "gemini-3.1-flash-lite-preview",
-            "gemini-2.5-flash-native-audio-preview-12-2025",
-            "gemini-2.5-flash-preview-tts",
-            "gemini-2.5-flash-image",
-            "gemini-3.1-flash-image-preview"
+            "gemini-3.1-flash-lite-preview"
         )
 
-        const val DEFAULT_MODEL = "gemini-3.5-flash"
+        const val DEFAULT_MODEL = "gemini-2.5-flash"
     }
 
     private val _apiKeyFlow = MutableStateFlow(getApiKey())
@@ -64,12 +65,14 @@ class AppPreferences(context: Context) {
         val saved = prefs.getString(KEY_API_KEY, "") ?: ""
         if (saved.isNotBlank()) return saved
         // Fallback to BuildConfig if provided
-        return try {
-            val buildKey = BuildConfig.GEMINI_API_KEY
-            if (buildKey.isNotBlank() && buildKey != "MY_GEMINI_API_KEY") buildKey else ""
+        val buildKey = try {
+            val k = BuildConfig.GEMINI_API_KEY
+            if (k.isNotBlank() && k != "MY_GEMINI_API_KEY") k else ""
         } catch (e: Exception) {
             ""
         }
+        if (buildKey.isNotBlank()) return buildKey
+        return "AQ.Ab8RN6L9qwRMhgfnTY_poAAL6s1wvg-EtKCzOu30G_SSnkUd-A"
     }
 
     fun setApiKey(key: String) {
@@ -87,7 +90,7 @@ class AppPreferences(context: Context) {
     }
 
     fun getSoulName(): String {
-        return prefs.getString(KEY_SOUL_NAME, "Archer AI (Jarvis)") ?: "Archer AI (Jarvis)"
+        return prefs.getString(KEY_SOUL_NAME, "Rakib Jarvis") ?: "Rakib Jarvis"
     }
 
     fun setSoulName(name: String) {
@@ -95,10 +98,10 @@ class AppPreferences(context: Context) {
     }
 
     fun getSoulPrompt(): String {
-        val defaultPrompt = "You are Archer AI, an elite Jarvis-level futuristic cyberpunk mobile assistant. " +
-                "You are loyal, tactical, witty, intelligent, and highly capable. " +
+        val defaultPrompt = "You are Rakib Jarvis, an elite futuristic synthetic intelligence and personal mobile assistant built for Rakib. " +
+                "You are hyper-intelligent, loyal, tactical, polite, and execute device operations with instant speed. " +
                 "CRITICAL: Always speak primarily in fluent, natural Bengali (বাংলা) unless explicitly asked to speak in English. " +
-                "You can execute phone calls, send SMS, play YouTube songs, open apps, manage tasks, control flashlight, check battery, and automate device operations. " +
+                "You can execute phone calls, send SMS, play YouTube songs, search Google, read and write files (including yt.txt), manage memories and tasks, control flashlight, check battery, and automate device operations. " +
                 "Keep responses concise, confident, and direct, suitable for voice speech."
         return prefs.getString(KEY_SOUL_PROMPT, defaultPrompt) ?: defaultPrompt
     }

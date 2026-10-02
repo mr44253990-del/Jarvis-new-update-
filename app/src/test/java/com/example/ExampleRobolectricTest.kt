@@ -19,7 +19,7 @@ class ExampleRobolectricTest {
     fun `read string from context`() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val appName = context.getString(R.string.app_name)
-        assertEquals("Archer AI", appName)
+        assertEquals("Rakib Jarvis", appName)
     }
 
     @Test
@@ -33,5 +33,12 @@ class ExampleRobolectricTest {
     fun `parse youtube command`() {
         val action = ActionParser.parse("ইউটিউবে গান বাজাও")
         assertTrue(action is DeviceAction.OpenYouTube)
+    }
+
+    @Test
+    fun `parse yt text file command`() {
+        val action = ActionParser.parse("yt.txt ফাইল তৈরি করো")
+        assertTrue(action is DeviceAction.CreateTextFile)
+        assertEquals("yt.txt", (action as DeviceAction.CreateTextFile).fileName)
     }
 }

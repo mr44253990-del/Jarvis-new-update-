@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 enum class SheetType {
-    MEMORY, CHAT, SOUL, SETTINGS, DIAGNOSTICS, HISTORY, TASKS, HEADLINES
+    MEMORY, CHAT, SOUL, SETTINGS, DIAGNOSTICS, HISTORY, TASKS, HEADLINES, NOTES
 }
 
 class ArcherViewModel(application: Application) : AndroidViewModel(application) {
@@ -53,6 +53,9 @@ class ArcherViewModel(application: Application) : AndroidViewModel(application) 
 
     private val _isThinking = MutableStateFlow(false)
     val isThinking: StateFlow<Boolean> = _isThinking.asStateFlow()
+
+    private val _isMemoryActive = MutableStateFlow(false)
+    val isMemoryActive: StateFlow<Boolean> = _isMemoryActive.asStateFlow()
 
     private val _isMuted = MutableStateFlow(false)
     val isMuted: StateFlow<Boolean> = _isMuted.asStateFlow()
@@ -172,6 +175,9 @@ class ArcherViewModel(application: Application) : AndroidViewModel(application) 
             // 2. Query Google Gemini live model
             _isThinking.value = true
             val memoryStrings = memories.value.map { "${it.factKey}: ${it.factValue}" }
+            if (memoryStrings.isNotEmpty()) {
+                _isMemoryActive.value = true
+            }
             val historyPairs = chatMessages.value.takeLast(6).map { it.sender to it.text }
 
             val result = apiClient.generateResponse(
@@ -184,6 +190,7 @@ class ArcherViewModel(application: Application) : AndroidViewModel(application) 
             )
 
             _isThinking.value = false
+            _isMemoryActive.value = false
             result.onSuccess { aiText ->
                 _lastAiResponse.value = aiText
                 db.chatMessageDao().insertMessage(
@@ -271,7 +278,24 @@ class ArcherViewModel(application: Application) : AndroidViewModel(application) 
 
     fun addMemory(key: String, value: String) {
         viewModelScope.launch {
+            _isMemoryActive.value = true
             db.memoryDao().insertMemory(MemoryEntity(factKey = key, factValue = value))
+            kotlinx.coroutines.delay(1200)
+            _isMemoryActive.value = false
+        }
+    }
+
+    fun launchMiniMode(context: android.content.Context): Boolean {
+        return if (android.provider.Settings.canDrawOverlays(context)) {
+            val intent = android.content.Intent(context, com.example.service.ArcherFloatingOverlayService::class.java)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                context.startForegroundService(intent)
+            } else {
+                context.startService(intent)
+            }
+            true
+        } else {
+            false
         }
     }
 

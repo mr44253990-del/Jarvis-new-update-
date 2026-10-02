@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "Archer AI"
+rootProject.name = "Rakib Jarvis"
 
 include(":app")

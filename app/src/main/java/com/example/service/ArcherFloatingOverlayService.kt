@@ -46,7 +46,7 @@ class ArcherFloatingOverlayService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "Archer AI Assistant Overlay",
+                "Rakib Jarvis Assistant Overlay",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
                 description = "Runs the floating Jarvis reactor orb widget"
@@ -64,8 +64,8 @@ class ArcherFloatingOverlayService : Service() {
         )
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Archer AI Active")
-            .setContentText("Jarvis floating core is online. Tap to open.")
+            .setContentTitle("Rakib Jarvis Active")
+            .setContentText("Jarvis floating core is online. Tap to open or control.")
             .setSmallIcon(android.R.drawable.ic_btn_speak_now)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
